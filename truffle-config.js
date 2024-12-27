@@ -52,7 +52,9 @@ module.exports = {
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
-      chainId: 80002
+      chainId: 80002,
+      gas: 6000000,
+      gasPrice: 30000000000
     }
   },
 
@@ -64,6 +66,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
+      version: "0.8.20"
     }
   },
   db: {

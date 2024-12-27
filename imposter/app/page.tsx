@@ -4,9 +4,11 @@ import { useEffect, useState } from "react"
 import Web3 from "web3"
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wallet, Send, Tag, AlertCircle, Loader, ChevronDown } from 'lucide-react'
+import contractABI from '../../build/contracts/Imposter.json'
 
-const contractABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"content","type":"string"},{"indexed":true,"internalType":"string","name":"tag","type":"string"}],"name":"NewPost","type":"event"},{"constant":false,"inputs":[{"internalType":"string","name":"content","type":"string"},{"internalType":"string","name":"tag","type":"string"}],"name":"post","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]
-const contractAddress = "0xbff30E75f27CBF45185783b2DdBFf3cf1EB477Fa"
+
+// const contractABI = [{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"content","type":"string"},{"indexed":true,"internalType":"string","name":"tag","type":"string"}],"name":"NewPost","type":"event"},{"constant":false,"inputs":[{"internalType":"string","name":"content","type":"string"},{"internalType":"string","name":"tag","type":"string"}],"name":"post","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]
+const contractAddress = "0x38550efd7C72AB85cc8Cc6b802d96Dd943CF9F8e"
 
 const AMOY_CHAIN_ID = '0x13882'
 const AMOY_RPC_URL = 'https://rpc-amoy.polygon.technology'
@@ -54,6 +56,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [transactionPending, setTransactionPending] = useState(false)
+  // New state variables for setTokenAddress and setThreshold
+  const [newTokenAddress, setNewTokenAddress] = useState('')
+  const [newThreshold, setNewThreshold] = useState('')
 
   useEffect(() => {
     checkNetwork()
@@ -102,7 +107,7 @@ export default function Home() {
 
       const address = accounts[0]
       const contractInstance = new web3Instance.eth.Contract(
-        contractABI,
+        contractABI.abi,
         contractAddress
       )
 
@@ -168,9 +173,8 @@ export default function Home() {
     setError('')
 
     try {
-      const gasPrice = await web3.eth.getGasPrice()
-      const gasEstimate = await contract.methods.post(content, tag)
-        .estimateGas({ from: userAddress })
+      const gasPrice = await web3.eth.getGasPrice(); // Set a fixed gas price (20 Gwei)
+      const gasEstimate = 300000;
 
       const tx = await contract.methods.post(content, tag)
         .send({
@@ -198,6 +202,83 @@ export default function Home() {
     }
   }
 
+  // New functions to handle setting token address and threshold
+  const handleSetTokenAddress = async () => {
+    if (!newTokenAddress) {
+      setError('Введите новый адрес токена')
+      return
+    }
+
+    if (!contract || !userAddress) {
+      setError('Сначала подключите кошелек')
+      return
+    }
+
+    setTransactionPending(true)
+    setError('')
+
+    try {
+      const gasPrice = await web3.eth.getGasPrice(); // Set a fixed gas price (20 Gwei)
+      const gasEstimate = 300000;
+
+      console.log(gasPrice)
+      console.log(gasEstimate)
+
+      const tx = await contract.methods.setTokenAddress(newTokenAddress)
+        .send({
+          from: userAddress,
+          gas: BigInt(Math.round(Number(gasEstimate) * 1.2)),
+          gasPrice: BigInt(gasPrice),
+        })
+
+      console.log('Token address updated:', tx.transactionHash)
+      setNewTokenAddress('')
+    } catch (err) {
+      console.error('Set token address error:', err)
+      setError('Ошибка при обновлении адреса токена. Проверьте консоль')
+    } finally {
+      setTransactionPending(false)
+    }
+  }
+
+  const handleSetThreshold = async () => {
+    const thresholdValue = parseInt(newThreshold)
+    if (isNaN(thresholdValue) || thresholdValue <= 0) {
+      setError('Введите корректное значение порога')
+      return
+    }
+
+    if (!contract || !userAddress) {
+      setError('Сначала подключите кошелек')
+      return
+    }
+
+    setTransactionPending(true)
+    setError('')
+
+    try {
+      const gasPrice = await web3.eth.getGasPrice(); // Set a fixed gas price (20 Gwei)
+      const gasEstimate = 300000;
+
+      console.log(gasPrice)
+      console.log(gasEstimate)
+      const tx = await contract.methods.setThreshold(BigInt(thresholdValue) * BigInt(1e18))
+        .send({
+          from: userAddress,
+          gas: BigInt(Math.round(Number(gasEstimate) * 1.2)),
+          gasPrice: BigInt(gasPrice),
+        })
+
+      console.log('Threshold updated:', tx.transactionHash)
+      setNewThreshold('')
+    } catch (err) {
+      console.error('Set threshold error:', err)
+      setError('Ошибка при обновлении порога. Проверьте консоль')
+    } finally {
+      setTransactionPending(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
       <Head>
@@ -218,6 +299,44 @@ export default function Home() {
         >
           Web3 Social DApp
         </motion.h1>
+
+        {/* New fields and buttons for setTokenAddress and setThreshold */}
+        <div className="space-y-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Новый адрес токена"
+              value={newTokenAddress}
+              onChange={(e) => setNewTokenAddress(e.target.value)}
+              className="w-full p-3 bg-white border border-gray-200 rounded-lg pl-10 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            />
+          </div>
+          <button
+            onClick={handleSetTokenAddress}
+            disabled={transactionPending}
+            className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all duration-300"
+          >
+            {transactionPending ? <Loader className="w-5 h-5 animate-spin" /> : 'Установить адрес токена'}
+          </button>
+
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="Новый порог"
+              value={newThreshold}
+              onChange={(e) => setNewThreshold(e.target.value)}
+              className="w-full p-3 bg-white border border-gray-200 rounded-lg pl-10 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+            />
+          </div>
+          <button
+            onClick={handleSetThreshold}
+            disabled={transactionPending}
+            className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all duration-300"
+          >
+            {transactionPending ? <Loader className="w-5 h-5 animate-spin" /> : 'Установить порог'}
+          </button>
+        </div>
+
 
         <AnimatePresence>
           {networkId && networkId !== 1 && (

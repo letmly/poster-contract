@@ -34,6 +34,8 @@
     "dotenv": "^9.0.0"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
+    "add": "^2.0.6",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.469.0"
   }
