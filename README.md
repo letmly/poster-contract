@@ -1,150 +1,142 @@
 # Polygon Box
 
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Setup](#setup)
-  - [Using the .env File](#using-the-env-file)
-  - [New Configuration File](#new-configuration-file)
-  - [New Directory Structure for Artifacts](#new-directory-structure-for-artifacts)
-- [Polygon PoS Chain](#polygon-pos-chain)
-  - [Compiling](#compiling)
-  - [Migrating](#migrating)
-  - [Paying For Migrations](#paying-for-migrations)
-  - [Basic Commands](#basic-commands)
-  - [Testing](#testing)
-  - [Communication Between Ethereum and Polygon PoS Chains](#communication-between-ethereum-and-polygon-pos-chains)
-- [Support](#support)
+## Описание
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+Polygon Box — это шаблон для разработки, который предоставляет необходимую структуру для начала работы с решением Ethereum L2 от Polygon, известным как Polygon PoS chain (ранее Matic PoS chain). Этот проект включает в себя базовый контракт SimpleStorage и предназначен для того, чтобы помочь разработчикам быстро начать работу с Polygon PoS без необходимости писать сложные приложения.
 
-This Truffle Polygon box provides you with the boilerplate structure necessary to start coding for Polygon's Ethereum L2 solution, the Polygon PoS chain (previously called the Matic PoS chain). For detailed information on how the Polygon PoS chain works, please see their documentation [here](https://docs.matic.network/docs/develop/getting-started).
+## Требования
 
-As a starting point, this box contains only the SimpleStorage Solidity contract. Including minimal code was a conscious decision as this box is meant to provide the initial building blocks needed to get to work on Polygon PoS without pushing developers to write any particular sort of application. With this box, you will be able to compile, migrate, and test Solidity code against several instances of Polygon PoS networks.
+Для работы с Polygon Box необходимы следующие компоненты:
 
-Polygon's L2 solution is fully compatible with the EVM. This means you will not need a new compiler to deploy Solidity contracts, and should be able to add your own Solidity contracts to this project. The main difference developers will encounter is in accessing and interacting with the Polygon PoS network. Additionally, Polygon offers multiple ways for dapp developers to implement communication between Ethereum ("Layer 1") and Polygon PoS. Further information about how to enable Ethereum-Polygon communication can be found in the Polygon documentation [here](https://docs.matic.network/docs/develop/ethereum-matic/getting-started).
+- [Node.js](https://nodejs.org/) версии 10.x или выше
+- [NPM](https://docs.npmjs.com/cli/) версии 5.2 или выше
+- Операционная система: Windows, Linux или MacOS
 
-_A note about naming: The Polygon ecosystem was previously called Matic Network. The chain to which we'll be deploying in this Truffle Box is now called the Polygon PoS chain. We have named this box the Polygon Box because we expect to include the ability to deploy to future Polygon chains in addition to what is presented here as an initial proof-of-concept, and developers using this Polygon Box may find themselves incorporating additional aspects of the Polygon ecosystem in their work._
+Полезно, но не обязательно:
 
-## Requirements
+- Учетная запись и Project ID на [Infura](https://infura.io/)
+- Учетная запись на [MetaMask](https://metamask.io/)
 
-The Polygon box has the following requirements:
+## Установка
 
-- [Node.js](https://nodejs.org/) 10.x or later
-- [NPM](https://docs.npmjs.com/cli/) version 5.2 or later
-- Windows, Linux or MacOS
-
-Helpful, but optional:
-
-- An [Infura](https://infura.io/) account and Project ID
-- A [MetaMask](https://metamask.io/) account
-
-## Installation
+Чтобы установить проект, выполните следующую команду:
 
 ```bash
-$ truffle unbox polygon
+truffle unbox polygon
 ```
 
-## Setup
+## Настройка
 
-### Using the env File
+### Использование файла .env
 
-You will need at least one mnemonic to use with the network. The `.dotenv` npm package has been installed for you, and you will need to create a `.env` file for storing your mnemonic and any other needed private information.
+Для работы с сетью вам понадобится как минимум один мнемоник. Пакет `.dotenv` уже установлен, и вам нужно создать файл `.env` для хранения вашего мнемоника и другой необходимой конфиденциальной информации.
 
-The `.env` file is ignored by git in this project, to help protect your private data. In general, it is good security practice to avoid committing information about your private keys to github. The `truffle-config.polygon.js` file expects a `MNEMONIC` value to exist in `.env` for running migrations on the networks listed in `truffle-config.polygon.js`.
+Файл `.env` игнорируется Git в этом проекте, чтобы защитить ваши личные данные. Важно избегать коммита информации о ваших приватных ключах в GitHub. Файл `truffle-config.polygon.js` ожидает, что в `.env` будет значение `MNEMONIC` для выполнения миграций на указанных сетях.
 
-If you are unfamiliar with using `.env` for managing your mnemonics and other keys, the basic steps for doing so are below:
+Если вы не знакомы с использованием `.env` для управления вашими мнемониками и другими ключами, выполните следующие шаги:
 
-1. Use `touch .env` in the command line to create a `.env` file at the root of your project.
-2. Open the `.env` file in your preferred IDE
-3. Add the following, filling in your own mnemonic and Infura project key:
+1. Создайте файл `.env` в корне вашего проекта с помощью команды:
+   ```bash
+   touch .env
+   ```
+2. Откройте файл `.env` в вашем любимом IDE.
+3. Добавьте следующее, заполнив свои данные:
+   ```
+   MNEMONIC="<Ваш Мнемоник>"
+   INFURA_PROJECT_ID="<Ваш Infura Project ID>"
+   ```
 
-```
-MNEMONIC="<Your Mnemonic>"
-INFURA_PROJECT_ID="<Your Infura Project ID>"
-```
+4. В процессе разработки вы можете добавлять любую другую конфиденциальную информацию в этот файл. Вы можете получить к ней доступ из других файлов с помощью `require('dotenv').config()` и ссылаться на переменные с помощью `process.env['<ВАША_ПЕРЕМЕННАЯ>']`.
 
-4. As you develop your project, you can put any other sensitive information in this file. You can access it from other files with `require('dotenv').config()` and refer to the variable you need with `process.env['<YOUR_VARIABLE>']`.
+### Новый конфигурационный файл
 
-### New Configuration File
+В этом проекте существует новый конфигурационный файл: `truffle-config.polygon.js`. Этот файл содержит ссылку на новое местоположение `contracts_build_directory` для контрактов Polygon PoS и перечисляет несколько сетей, работающих на Polygon PoS Layer 2 (см. ниже).
 
-A new configuration file exists in this project: `truffle-config.polygon.js`. This file contains a reference to the new file location of the `contracts_build_directory` for Polygon PoS contracts and lists several networks that are running the Polygon PoS Layer 2 network instance (see [below](#migrating)).
+Обратите внимание, что классический файл конфигурации `truffle-config.js` также включен, так как вам в конечном итоге потребуется развернуть контракты и на Ethereum. Все обычные команды Truffle (`truffle compile`, `truffle migrate` и т.д.) будут использовать этот конфигурационный файл и сохранять собранные файлы в `build/ethereum-contracts`. Вы можете сохранять контракты Solidity, которые хотите развернуть на Ethereum, в папке `contracts/ethereum`.
 
-Please note, the classic `truffle-config.js` configuration file is included here as well, because you will eventually want to deploy contracts to Ethereum as well. All normal truffle commands (`truffle compile`, `truffle migrate`, etc.) will use this config file and save built files to `build/ethereum-contracts`. You can save Solidity contracts that you wish to deploy to Ethereum in the `contracts/ethereum` folder.
+### Новая структура каталогов для артефактов
 
-### New Directory Structure for Artifacts
-
-When you compile or migrate, the resulting `json` files will be at `build/polygon-contracts/`. This is to distinguish them from any Ethereum contracts you build, which will live in `build/ethereum-contracts `. As we have included the appropriate `contracts_build_directory` in each configuration file, Truffle will know which set of built files to reference!
+Когда вы компилируете или мигрируете, результирующие файлы `json` будут находиться в `build/polygon-contracts/`. Это сделано для того, чтобы отличать их от любых Ethereum контрактов, которые вы создаете, которые будут находиться в `build/ethereum-contracts`. Поскольку мы включили соответствующий `contracts_build_directory` в каждый конфигурационный файл, Truffle будет знать, какой набор собранных файлов использовать!
 
 ## Polygon PoS Chain
 
-### Compiling
+### Компиляция
 
-You do not need to add any new compilers or settings to compile your contracts for the Polygon PoS chain, as it is fully EVM compatible. The `truffle-config.polygon.js` configuration file indicates the contract and build paths for Polygon-destined contracts.
+Вам не нужно добавлять новые компиляторы или настройки для компиляции ваших контрактов для Polygon PoS chain, так как он полностью совместим с EVM. Файл конфигурации `truffle-config.polygon.js` указывает пути к контрактам и сборкам для контрактов, предназначенных для Polygon.
 
-If you are compiling contracts specifically for the Polygon PoS network, use the following command, which indicates the appropriate configuration file:
+Если вы компилируете контракты специально для сети Polygon PoS, используйте следующую команду:
 
-```
+```bash
 npm run compile:polygon
 ```
 
-If you would like to recompile previously compiled contracts, you can manually run this command with
-`truffle compile --config=truffle-config.polygon.js` and add the `--all` flag.
-
-### Migrating
-
-To migrate on the Polygon PoS network, run `npm run migrate:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)` (remember to choose a network from these options!).
-
-As you can see, you have several Polygon PoS L2 networks to choose from:
-
-_Infura networks_. Infura is running a testnet node as well as a mainnet node for the Polygon PoS chain. Deployment to these networks requires that you sign up for an Infura account and initiate a project. See the Infura website for [details](https://infura.io/). In the example network configuration, we expect you to have a public Infura project key, which you should indicate in your `.env` file. The following Infura networks are indicated in the `truffle-config.polygon.js` file:
-
-- `polygon_infura_testnet`: This is the Infura Polygon PoS testnet.
-- `polygon_infura_mainnet`: This is the Infura Polygon PoS mainnet. Caution! If you deploy to this network using a connected wallet, the fees are charged in mainnet MATIC.
-
-If you would like to migrate previously migrated contracts on the same network, you can run `truffle migrate --config truffle-config.polygon.js --network= (polygon_infura_testnet | polygon_infura_mainnet)` and add the `--reset` flag.
-
-### Paying for Migrations
-
-To pay for your deployments, you will need to have an account with ETH available to spend. You will need your mnemomic phrase (saved in the `.env` file or through some other secure method). The first account generated by the seed needs to have the ETH you need to deploy. For reference, the Polygon PoS testnets are based in goerli, so you should be able to use goerli ETH.
-
-If you do not have a wallet with funds to deploy, you will need to connect a wallet to at least one of the networks above. For testing, this means you will want to connect a wallet to the `polygon_infura_testnet` network. We recommend using [MetaMask](https://metamask.io/).
-
-Documentation for how to set up MetaMask custom networks with the Polygon PoS network can be found [here](https://docs.matic.network/docs/develop/metamask/config-matic).
-
-Follow the steps in the documentation above using Infura's RPC endpoints (`"https://polygon-mainnet.infura.io/v3/" + infuraProjectId` and `"https://polygon-mumbai.infura.io/v3/" + infuraProjectId`). The `chainId` values are the same as those in the `truffle-config.polygon.js` networks entries.
-
-To get testnet ETH to use, visit a faucet like https://goerli-faucet.slock.it/.
-
-## Basic Commands
-
-The code here will allow you to compile, migrate, and test your code against a Polygon PoS network instance. The following commands can be run (more details on each can be found in the next section):
-
-To compile:
-
+Если вы хотите повторно скомпилировать ранее скомпилированные контракты, вы можете вручную запустить эту команду с помощью:
+```bash
+truffle compile --config=truffle-config.polygon.js --all
 ```
+
+### Миграция
+
+Чтобы мигрировать на сеть Polygon PoS, выполните команду:
+```bash
+npm run migrate:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)
+```
+(не забудьте выбрать одну из сетей!)
+
+Как вы можете видеть, у вас есть несколько сетей Polygon PoS L2 на выбор:
+
+- **Сети Infura**. Infura запускает узел тестовой сети, а также узел основной сети для Polygon PoS chain. Развертывание на этих сетях требует, чтобы вы зарегистрировались в Infura и инициировали проект. Подробности можно найти на сайте Infura.
+
+В файле конфигурации `truffle-config.polygon.js` указаны следующие сети Infura:
+- `polygon_infura_testnet`: Тестовая сеть Infura Polygon PoS.
+- `polygon_infura_mainnet`: Основная сеть Infura Polygon PoS. Осторожно! Если вы развернете на этой сети, используя подключенный кошелек, сборы будут взиматься в основной сети MATIC.
+
+Если вы хотите мигрировать ранее мигрированные контракты на той же сети, вы можете выполнить команду:
+```bash
+truffle migrate --config truffle-config.polygon.js --network=(polygon_infura_testnet | polygon_infura_mainnet) --reset
+```
+
+### Оплата за миграции
+
+Чтобы оплатить ваши развертывания, вам нужно иметь учетную запись с ETH, доступным для расходования. Вам понадобится ваш мнемоник (сохраненный в файле `.env` или другим безопасным способом). Первый аккаунт, сгенерированный из семени, должен иметь ETH, необходимый для развертывания. Для справки, тестовые сети Polygon PoS основаны на Goerli, поэтому вы сможете использовать Goerli ETH.
+
+Если у вас нет кошелька с достаточным количеством средств для развертывания, вам нужно будет подключить кошелек к хотя бы одной из вышеуказанных сетей. Для тестирования это означает, что вам нужно будет подключить кошелек к сети `polygon_infura_testnet`. Мы рекомендуем использовать [MetaMask](https://metamask.io/).
+
+Документация о том, как настроить пользовательские сети MetaMask с сетью Polygon PoS, доступна [здесь](https://docs.matic.network/docs/develop/metamask/config-matic).
+
+Чтобы получить тестовые ETH, посетите краны, такие как [https://goerli-faucet.slock.it/](https://goerli-faucet.slock.it/).
+
+## Основные команды
+
+Код здесь позволит вам компилировать, мигрировать и тестировать ваш код против экземпляра сети Polygon PoS. Следующие команды могут быть выполнены (более подробная информация о каждой команде будет представлена в следующем разделе):
+
+Для компиляции:
+```bash
 npm run compile:polygon
 ```
 
-To migrate:
-
-```
+Для миграции:
+```bash
 npm run migrate:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)
 ```
 
-To test:
-
-```
+Для тестирования:
+```bash
 npm run test:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)
 ```
 
-### Testing
+### Тестирование
 
-In order to run the test currently in the boilerplate, use the following command: `npm run test:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)` (remember to choose a network!). The current test file just has some boilerplate tests to get you started. You will likely want to add network-specific tests to ensure your contracts are behaving as expected.
+Чтобы запустить тест, который сейчас находится в шаблоне, используйте следующую команду:
+```bash
+npm run test:polygon --network=(polygon_infura_testnet | polygon_infura_mainnet)
+```
+(не забудьте выбрать сеть!). Текущий тестовый файл содержит некоторые базовые тесты, чтобы помочь вам начать. Вам, вероятно, нужно будет добавить специфические для сети тесты, чтобы убедиться, что ваши контракты работают как ожидалось.
 
-### Communication Between Ethereum and Polygon PoS Chains
+### Связь между Ethereum и Polygon PoS Chains
 
-The information above should allow you to deploy to the Polygon PoS Layer 2 chain. This is only the first step! Once you are ready to deploy your own contracts to function on L1 using L2, you will need to be aware of the [ways in which Layer 1 and Layer 2 interact in the Polygon ecosystem](https://docs.matic.network/docs/develop/ethereum-matic/getting-started). Keep an eye out for additional Truffle tooling and examples that elucidate this second step to full Polygon PoS L2 integration!
+Информация выше должна позволить вам развернуть на Polygon PoS Layer 2 chain. Это только первый шаг! Как только вы будете готовы развернуть свои собственные контракты для работы на L1 с использованием L2, вам нужно будет знать о [способах взаимодействия между Layer 1 и Layer 2 в экосистеме Polygon](https://docs.matic.network/docs/develop/ethereum-matic/getting-started). Следите за дополнительными инструментами Truffle и примерами, которые прояснят этот второй шаг к полной интеграции Polygon PoS L2!
 
-## Support
+## Поддержка
 
-Support for this box is available via the Truffle community [here](https://www.trufflesuite.com/community).
+Поддержка для этого шаблона доступна через сообщество Truffle [здесь](https://www.trufflesuite.com/community).
